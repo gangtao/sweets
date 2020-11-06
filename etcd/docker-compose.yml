@@ -1,0 +1,23 @@
+version: '2'
+
+networks:
+  app-tier:
+    driver: bridge
+
+services:
+  etcd:
+    image: 'bitnami/etcd:latest'
+    environment:
+      - ALLOW_NONE_AUTHENTICATION=yes
+      - ETCD_ADVERTISE_CLIENT_URLS=http://etcd:2379
+    ports:
+      - 3000:2379
+      - 3001:2380
+    networks:
+      - app-tier
+  ui:
+    image: 'evildecay/etcdkeeper'
+    ports:
+        - 8080:8080
+    networks:
+      - app-tier

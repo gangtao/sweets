@@ -1,0 +1,33 @@
+version: '2'
+
+networks:
+  app-tier:
+    driver: bridge
+
+services:
+  zk:
+    image: 'zookeeper'
+    restart: always
+    hostname: zk
+    ports:
+      - 2181:2181
+    networks:
+      - app-tier
+  ui:
+    image: 'elkozmon/zoonavigator'
+    restart: unless-stopped
+    ports:
+      - 9000:9000
+    networks:
+      - app-tier
+  
+  config:
+    image: 'candy:0.1'
+    restart: always
+    environment:
+      - ZK_HOST=zk
+    hostname: config
+    ports:
+      - 50051:50051
+    networks:
+      - app-tier
