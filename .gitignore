@@ -2,3 +2,4 @@ server/server
 client/client
 zk/zk
 etcd/etcd
+.DS_Store

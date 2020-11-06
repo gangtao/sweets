@@ -13,19 +13,37 @@ services:
       - 2181:2181
     networks:
       - app-tier
-  ui:
+  zkui:
     image: 'elkozmon/zoonavigator'
     restart: unless-stopped
     ports:
       - 9000:9000
     networks:
       - app-tier
+  etcd:
+    image: 'bitnami/etcd:latest'
+    hostname: etcd
+    environment:
+      - ALLOW_NONE_AUTHENTICATION=yes
+      - ETCD_ADVERTISE_CLIENT_URLS=http://etcd:2379
+    ports:
+      - 3000:2379
+      - 3001:2380
+    networks:
+      - app-tier
+  etcdui:
+    image: 'evildecay/etcdkeeper'
+    ports:
+        - 9000:8080
+    networks:
+    - app-tier
   
   config:
-    image: 'candy:0.1'
+    image: 'sweets:0.1'
     restart: always
     environment:
-      - ZK_HOST=zk
+      - ETCD_HOST=etcd
+      - ETCD_PORT=2379
     hostname: config
     ports:
       - 50051:50051
