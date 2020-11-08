@@ -3,6 +3,7 @@ package main
 import (
 	"net/http"
 	"os"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gangtao/sweets/config"
@@ -87,6 +88,36 @@ func DeleteConfig(c *gin.Context) {
 	}
 }
 
+// ListenConfig
+// @Summary monitor configuration change
+// @Description monitor configuration change
+// @Tags monitor
+// @Accept json
+// @Produce json
+// @Param dataId query string true "data id of the config item"
+// @Param group query string true "group of the config item"
+// @Param timeout query int true "long pull timeout for monitor configuration"
+// @Success 200 {string} string ""
+// @Failure 500 {string} string ""
+// @Router /cs/configs/listen [get]
+func ListenConfig(c *gin.Context) {
+	dataId := c.Query("dataId")
+	group := c.Query("group")
+	timeoutString := c.Query("timeout")
+
+	timeout, err := strconv.Atoi(timeoutString)
+	if err != nil {
+		timeout = 30000  // default to 30s
+	}
+
+	val, err := kvClient.ListenConfig(dataId, group, timeout)
+	if err != nil {
+		c.String(http.StatusInternalServerError, "")
+	} else {
+		c.String(http.StatusOK, val)
+	}
+}
+
 // @title Sweets API
 // @version 1.0
 // @description This is a simple configuration service
@@ -115,6 +146,7 @@ func main() {
 	router.GET("/sweets/v1/cs/configs", GetConfig)
 	router.POST("/sweets/v1/cs/configs", PublishConfig)
 	router.DELETE("/sweets/v1/cs/configs", DeleteConfig)
+	router.POST("/sweets/v1/cs/configs/listen", ListenConfig)
 
 	router.Run() // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
 }

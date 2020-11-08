@@ -168,6 +168,58 @@ var doc = `{
                     }
                 }
             }
+        },
+        "/cs/configs/listen": {
+            "get": {
+                "description": "monitor configuration change",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "monitor"
+                ],
+                "summary": "monitor configuration change",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "data id of the config item",
+                        "name": "dataId",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "group of the config item",
+                        "name": "group",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "long pull timeout for monitor configuration",
+                        "name": "timeout",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
         }
     }
 }`

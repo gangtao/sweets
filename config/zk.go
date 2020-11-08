@@ -127,3 +127,16 @@ func (c *zkClient) DeleteConfig(dataId string, group string) error {
     }
 	return nil
 }
+
+func (c *zkClient) ListenConfig(dataId string, group string, timeout int) (string, error) {
+	log.Printf("ListenConfig for dataId [%s] group [%s]", dataId, group)
+
+	conn, _, err := zk.Connect(c.servers, c.sessionTimeout)
+    if err != nil {
+        log.Printf("Error : something terrible happen -> %s", err)
+        return "", err
+    }
+	defer conn.Close()
+
+	return "", nil
+}

@@ -51,7 +51,7 @@ func (c *etcdClient) GetConfig(dataId string, group string) (string, error) {
 	itemPath := fmt.Sprintf("/%s/%s", group, dataId)
 	getResp, err := kv.Get(context.TODO(), itemPath)
 	if err != nil {
-		panic(err)
+		return "", err
 	}
 	log.Printf("%+v\n",getResp)
 	for _, ev := range getResp.Kvs {
@@ -71,7 +71,7 @@ func (c *etcdClient) PublishConfig(dataId string, group string, content string) 
 	})
 
 	if err != nil {
-		panic(err)
+		return err
 	}
 	log.Println("connected to etcd ")
 
@@ -109,10 +109,27 @@ func (c *etcdClient) DeleteConfig(dataId string, group string) error {
 	itemPath := fmt.Sprintf("/%s/%s", group, dataId)
 	deleteResp, err := kv.Delete(context.TODO(), itemPath)
 	if err != nil {
-		panic(err)
+		return err
 	}
 	log.Printf("%+v\n",deleteResp)
 	log.Printf("key deleted %d\n",deleteResp.Deleted)
 
 	return nil
+}
+
+func (c *etcdClient) ListenConfig(dataId string, group string, timeout int) (string, error) {
+	log.Printf("ListenConfig for dataId [%s] group [%s]", dataId, group)
+
+	cli, err := clientv3.New(clientv3.Config{
+		Endpoints:   c.servers,
+		DialTimeout: c.sessionTimeout,
+	})
+
+	if err != nil {
+		return "", err
+	}
+	log.Println("connected to etcd ")
+	defer cli.Close()
+
+	return "", nil
 }

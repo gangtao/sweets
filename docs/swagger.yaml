@@ -104,4 +104,39 @@ paths:
       summary: publish configuration
       tags:
       - publish
+  /cs/configs/listen:
+    get:
+      consumes:
+      - application/json
+      description: monitor configuration change
+      parameters:
+      - description: data id of the config item
+        in: query
+        name: dataId
+        required: true
+        type: string
+      - description: group of the config item
+        in: query
+        name: group
+        required: true
+        type: string
+      - description: long pull timeout for monitor configuration
+        in: query
+        name: timeout
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: monitor configuration change
+      tags:
+      - monitor
 swagger: "2.0"
