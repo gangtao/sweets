@@ -9,16 +9,7 @@ import (
     "net/url"
 )
 
-func main() {
-    fmt.Println("Starting the application...")
-
-    base := "http://localhost:8080/sweets/v1/cs/configs"
-    
-    
-    dataId := "mydata"
-    group := "mygroup"
-    content := "hello world!"
-
+func testPublish(base string, dataId string, group string, content string) {
     // Publish Config
     publishUrl, err := url.Parse(base)
 	if err != nil {
@@ -40,10 +31,11 @@ func main() {
         fmt.Printf("The HTTP request failed with error %s\n", err)
     } else {
         data, _ := ioutil.ReadAll(publishRsp.Body)
-        fmt.Printf("Result is status %s , value %s\n", publishRsp.Status, string(data))
+        fmt.Printf("Publish Result is status %s , value %s\n", publishRsp.Status, string(data))
     }
-    
+}
 
+func testGet(base string, dataId string, group string) {
     // Get Config
     getUrl, err := url.Parse(base)
 	if err != nil {
@@ -62,11 +54,28 @@ func main() {
         fmt.Printf("The HTTP request failed with error %s\n", err)
     } else {
         data, _ := ioutil.ReadAll(getRsp.Body)
-        fmt.Printf("Result is status %s , value %s\n", getRsp.Status, string(data))
+        fmt.Printf("Get config Result is status %s , value %s\n", getRsp.Status, string(data))
+    }
+}
+
+func testDelete(base string, dataId string, group string) {
+    // Get Config
+    deleteUrl, err := url.Parse(base)
+	if err != nil {
+		fmt.Println("Malformed URL: ", err.Error())
+		return
     }
 
+    deleteParams := url.Values{}
+	deleteParams.Add("dataId", dataId)
+    deleteParams.Add("group", group)
+    deleteUrl.RawQuery = deleteParams.Encode()
+
+    jsonData := map[string]string{}
+    jsonValue, _ := json.Marshal(jsonData)
+
     // Delete Config
-    req, err := http.NewRequest(http.MethodDelete, getUrl.String(), bytes.NewBuffer(jsonValue))
+    req, err := http.NewRequest(http.MethodDelete, deleteUrl.String(), bytes.NewBuffer(jsonValue))
     client := &http.Client{}
     deleteResp, err := client.Do(req)
 
@@ -74,19 +83,22 @@ func main() {
         fmt.Printf("The HTTP request failed with error %s\n", err)
     } else {
         data, _ := ioutil.ReadAll(deleteResp.Body)
-        fmt.Printf("Result is status %s , value %s\n", deleteResp.Status, string(data))
+        fmt.Printf("Delete config Result is status %s , value %s\n", deleteResp.Status, string(data))
     }
+}
 
-	/*
-    jsonData := map[string]string{"firstname": "Nic", "lastname": "Raboy"}
-    jsonValue, _ := json.Marshal(jsonData)
-    response, err = http.Post("https://httpbin.org/post", "application/json", bytes.NewBuffer(jsonValue))
-    if err != nil {
-        fmt.Printf("The HTTP request failed with error %s\n", err)
-    } else {
-        data, _ := ioutil.ReadAll(response.Body)
-        fmt.Println(string(data))
-	}
-	*/
+func main() {
+    fmt.Println("Starting the application...")
+
+    base := "http://localhost:8080/sweets/v1/cs/configs"
+    dataId := "mydata"
+    group := "mygroup"
+    content := "hello world!"
+
+    testPublish(base, dataId, group, content) 
+    testGet(base, dataId, group)
+    testDelete(base, dataId, group)
+    testPublish(base, dataId, group, content)
+
 	fmt.Println("Terminating the application...")
 }

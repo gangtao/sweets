@@ -2,6 +2,7 @@ package main
 
 import (
 	"net/http"
+	"os"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gangtao/sweets/config"
@@ -49,7 +50,12 @@ func DeleteConfig(c *gin.Context) {
 }
 
 func main() {
-	kvClient = config.NewEtcdStore()
+	kvType := os.Getenv("KV_TYPE")
+	if kvType == "ZK" {
+		kvClient = config.NewZKStore()
+	} else {
+		kvClient = config.NewEtcdStore()
+	}
 
 	router := gin.Default()
 
