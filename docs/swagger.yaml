@@ -1,0 +1,107 @@
+basePath: /sweets/v1
+host: localhost:8080
+info:
+  contact:
+    email: gang.tao@outlook.com
+    name: gang tao
+  description: This is a simple configuration service
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  title: Sweets API
+  version: "1.0"
+paths:
+  /cs/configs:
+    delete:
+      consumes:
+      - application/json
+      description: delete configuration
+      parameters:
+      - description: data id of the config item
+        in: query
+        name: dataId
+        required: true
+        type: string
+      - description: group of the config item
+        in: query
+        name: group
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: "true"
+          schema:
+            type: string
+        "500":
+          description: "false"
+          schema:
+            type: string
+      summary: delete configuration
+      tags:
+      - delete
+    get:
+      consumes:
+      - application/json
+      description: get configuration
+      parameters:
+      - description: data id of the config item
+        in: query
+        name: dataId
+        required: true
+        type: string
+      - description: group of the config item
+        in: query
+        name: group
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: get configuration
+      tags:
+      - get
+    post:
+      consumes:
+      - application/json
+      description: publish configuration
+      parameters:
+      - description: data id of the config item
+        in: query
+        name: dataId
+        required: true
+        type: string
+      - description: group of the config item
+        in: query
+        name: group
+        required: true
+        type: string
+      - description: content of the config item
+        in: query
+        name: content
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: "true"
+          schema:
+            type: string
+        "500":
+          description: "false"
+          schema:
+            type: string
+      summary: publish configuration
+      tags:
+      - publish
+swagger: "2.0"

@@ -8,14 +8,17 @@ DOCKER_ID_USER ?= naughtytao
 FULLNAME=$(DOCKER_ID_USER)/${BIN_NAME}:${VERSION}
 
 build:
-	cd ./server ; env GOOS=linux GOARCH=amd64 go build
+	env GOOS=linux GOARCH=amd64 go build
 	cd ./client ; env GOOS=linux GOARCH=amd64 go build
 
 docker: Dockerfile build
 	docker build -t $(IMAGE_NAME) .
 
+doc:
+	swag init
+
 clean:
-	rm -f ./server/server
+	rm -f ./sweets
 	rm -f ./client/client
 	rm -f ./zk/zk
 	rm -f ./etcd/etcd

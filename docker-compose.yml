@@ -34,7 +34,7 @@ services:
   etcdui:
     image: 'evildecay/etcdkeeper'
     ports:
-        - 9000:8080
+        - 9001:8080
     networks:
     - app-tier
   
@@ -46,6 +46,6 @@ services:
       - ETCD_PORT=2379
     hostname: config
     ports:
-      - 50051:50051
+      - 8080:8080
     networks:
       - app-tier
