@@ -73,6 +73,7 @@ func (c *zkClient) PublishConfig(dataId string, group string, content string) er
 	var flags int32 = 0
 	var acls = zk.WorldACL(zk.PermAll)
 	
+	// Create root node if it does not exist
 	if !exist {
 		var rootData = []byte("")
 		
@@ -85,13 +86,30 @@ func (c *zkClient) PublishConfig(dataId string, group string, content string) er
 	}
 
 	var itemPath = fmt.Sprintf("/%s/%s", group, dataId)
-	p, err_create := conn.Create(itemPath, []byte(content), flags, acls)
-	if err_create != nil {
-		log.Printf("Error : failed to create item -> %s", err_create)
-		return err_create
+
+	existItem, _, err := conn.Exists(itemPath)
+    if err != nil {
+        log.Printf("Error : failed to check existence of item -> %s", err)
+        return err
 	}
-	log.Printf("item node created: %s", p)
-	
+
+	if existItem {
+		_, err_set := conn.Set(itemPath, []byte(content), -1)
+		if err_set != nil {
+			log.Printf("Error : failed to set item -> %s", err_set)
+			return err_set
+		}
+		log.Printf("item node value set complete")
+
+	} else {
+		p, err_create := conn.Create(itemPath, []byte(content), flags, acls)
+		if err_create != nil {
+			log.Printf("Error : failed to create item -> %s", err_create)
+			return err_create
+		}
+		log.Printf("item node created: %s", p)
+	}
+
 	return nil
 }
 
