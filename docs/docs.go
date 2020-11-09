@@ -170,7 +170,7 @@ var doc = `{
             }
         },
         "/cs/configs/listen": {
-            "get": {
+            "post": {
                 "description": "monitor configuration change",
                 "consumes": [
                     "application/json"

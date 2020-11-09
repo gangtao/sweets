@@ -7,6 +7,8 @@ DOCKER_ID_USER ?= naughtytao
 
 FULLNAME=$(DOCKER_ID_USER)/${BIN_NAME}:${VERSION}
 
+#export PATH="$PATH:$(go env GOPATH)/bin"
+
 build:
 	env GOOS=linux GOARCH=amd64 go build
 	cd ./client ; env GOOS=linux GOARCH=amd64 go build

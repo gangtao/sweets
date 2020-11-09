@@ -118,7 +118,7 @@ func (c *etcdClient) DeleteConfig(dataId string, group string) error {
 }
 
 func (c *etcdClient) ListenConfig(dataId string, group string, timeout int) (string, error) {
-	log.Printf("ListenConfig for dataId [%s] group [%s]", dataId, group)
+	log.Printf("ListenConfig for dataId [%s] group [%s] timeout [%d]", dataId, group, timeout)
 
 	cli, err := clientv3.New(clientv3.Config{
 		Endpoints:   c.servers,
@@ -131,5 +131,18 @@ func (c *etcdClient) ListenConfig(dataId string, group string, timeout int) (str
 	log.Println("connected to etcd ")
 	defer cli.Close()
 
-	return "", nil
+	waiter := time.Tick(time.Duration(timeout) * time.Millisecond)
+	var itemPath = fmt.Sprintf("/%s/%s", group, dataId)
+
+	watchCh := cli.Watch(context.TODO(), itemPath)
+
+	select {
+	case e := <-watchCh:
+		value := e.Events[0].Kv.Value
+		log.Printf("found value change %s" , string(value))
+		return string(value), nil
+	case ts := <-waiter:
+		log.Printf("pulling timeout reached: %s", ts)
+		return "", nil
+	}
 }

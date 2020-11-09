@@ -36,7 +36,7 @@ func (c *zkClient) GetConfig(dataId string, group string) (string, error) {
 
 	conn, _, err := zk.Connect(c.servers, c.sessionTimeout)
     if err != nil {
-        log.Printf("Error : something terrible happen -> %s ", err)
+        log.Printf("Error : failed to connect to zk -> %s ", err)
         return "", err
     }
 	defer conn.Close()
@@ -44,7 +44,7 @@ func (c *zkClient) GetConfig(dataId string, group string) (string, error) {
 	var itemPath = fmt.Sprintf("/%s/%s", group, dataId)
 	v, _, err := conn.Get(itemPath)
     if err != nil {
-        log.Printf("Error : something terrible happen -> %s ", err)
+        log.Printf("Error : failed to get item from zk -> %s ", err)
         return "", err
     }
 
@@ -58,7 +58,7 @@ func (c *zkClient) PublishConfig(dataId string, group string, content string) er
 
 	conn, _, err := zk.Connect(c.servers, c.sessionTimeout)
     if err != nil {
-        log.Printf("Error : something terrible happen -> %s", err)
+        log.Printf("Error : failed to connect to zk -> %s", err)
         return err
     }
 	defer conn.Close()
@@ -66,7 +66,7 @@ func (c *zkClient) PublishConfig(dataId string, group string, content string) er
 	rootPath := fmt.Sprintf("/%s", group)
 	exist, _, err := conn.Exists(rootPath)
     if err != nil {
-        log.Printf("Error : something terrible happen -> %s", err)
+        log.Printf("Error : failed to check existence of item -> %s", err)
         return err
 	}
 
@@ -78,7 +78,7 @@ func (c *zkClient) PublishConfig(dataId string, group string, content string) er
 		
 		p, err_create := conn.Create(rootPath, rootData, flags, acls)
 		if err_create != nil {
-			log.Printf("Error : something terrible happen -> %s", err_create)
+			log.Printf("Error : failed to create item -> %s", err_create)
 			return err_create
 		}
 		log.Printf("root node created: %s", p)
@@ -87,7 +87,7 @@ func (c *zkClient) PublishConfig(dataId string, group string, content string) er
 	var itemPath = fmt.Sprintf("/%s/%s", group, dataId)
 	p, err_create := conn.Create(itemPath, []byte(content), flags, acls)
 	if err_create != nil {
-		log.Printf("Error : something terrible happen -> %s", err_create)
+		log.Printf("Error : failed to create item -> %s", err_create)
 		return err_create
 	}
 	log.Printf("item node created: %s", p)
@@ -100,7 +100,7 @@ func (c *zkClient) DeleteConfig(dataId string, group string) error {
 
 	conn, _, err := zk.Connect(c.servers, c.sessionTimeout)
     if err != nil {
-        log.Printf("Error : something terrible happen -> %s", err)
+        log.Printf("Error : failed to connect to zk -> %s", err)
         return err
     }
 	defer conn.Close()
@@ -110,7 +110,7 @@ func (c *zkClient) DeleteConfig(dataId string, group string) error {
 	// check exist
     exist, s, err := conn.Exists(itemPath)
     if err != nil {
-        log.Printf("Error : something terrible happen -> %s", err)
+        log.Printf("Error : failed to check existence -> %s", err)
         return err
 	}
 
@@ -122,21 +122,47 @@ func (c *zkClient) DeleteConfig(dataId string, group string) error {
 	// delete
     err = conn.Delete(itemPath, s.Version)
     if err != nil {
-        log.Printf("Error : something terrible happen -> %s", err)
+        log.Printf("Error : failed to delete item -> %s", err)
         return err
     }
 	return nil
 }
 
 func (c *zkClient) ListenConfig(dataId string, group string, timeout int) (string, error) {
-	log.Printf("ListenConfig for dataId [%s] group [%s]", dataId, group)
+	log.Printf("ListenConfig for dataId [%s] group [%s] timeout [%d]", dataId, group, timeout)
 
 	conn, _, err := zk.Connect(c.servers, c.sessionTimeout)
     if err != nil {
-        log.Printf("Error : something terrible happen -> %s", err)
+        log.Printf("Error : failed to connect to zk -> %s", err)
         return "", err
     }
 	defer conn.Close()
 
+	waiter := time.Tick(time.Duration(timeout) * time.Millisecond)
+	var itemPath = fmt.Sprintf("/%s/%s", group, dataId)
+
+	_, _, ch, _ := conn.GetW(itemPath)
+	select {
+	case e := <-ch:
+		if e.Err == nil {
+			if e.Type == zk.EventNodeDataChanged {
+				log.Printf("has node[%s] data changed\n", e.Path)
+				log.Printf("%+v\n", e)
+				v, _, err := conn.Get(itemPath)
+				if err != nil {
+					fmt.Println(err)
+					return "", nil
+				}
+	
+				log.Printf("value of path[%s]=[%s].\n", itemPath, v)
+				return string(v), nil
+			}
+		}
+	case ts := <-waiter:
+		log.Printf("pulling timeout reached: %s", ts)
+		return "", nil
+	}
+
+	// should not reach here
 	return "", nil
 }

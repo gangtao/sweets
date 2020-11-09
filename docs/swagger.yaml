@@ -105,7 +105,7 @@ paths:
       tags:
       - publish
   /cs/configs/listen:
-    get:
+    post:
       consumes:
       - application/json
       description: monitor configuration change

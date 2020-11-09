@@ -99,7 +99,7 @@ func DeleteConfig(c *gin.Context) {
 // @Param timeout query int true "long pull timeout for monitor configuration"
 // @Success 200 {string} string ""
 // @Failure 500 {string} string ""
-// @Router /cs/configs/listen [get]
+// @Router /cs/configs/listen [post]
 func ListenConfig(c *gin.Context) {
 	dataId := c.Query("dataId")
 	group := c.Query("group")
