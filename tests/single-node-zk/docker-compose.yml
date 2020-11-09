@@ -11,6 +11,8 @@ services:
     cpus: 2.0
     mem_limit: 512m
     mem_reservation: 512m
+    environment: 
+      - ZOO_MAX_CLIENT_CNXNS=200
     hostname: zk
     ports:
       - 2181:2181
