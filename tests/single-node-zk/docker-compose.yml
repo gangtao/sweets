@@ -1,0 +1,33 @@
+version: '2'
+
+networks:
+  app-tier:
+    driver: bridge
+
+services:
+  zk:
+    image: 'zookeeper'
+    restart: always
+    cpus: 2.0
+    mem_limit: 512m
+    mem_reservation: 512m
+    hostname: zk
+    ports:
+      - 2181:2181
+    networks:
+      - app-tier
+  
+  config:
+    image: 'sweets:0.1'
+    restart: always
+    cpus: 2.0
+    mem_limit: 512m
+    mem_reservation: 512m
+    environment:
+      - KV_TYPE=ZK
+      - ZK_HOST=zk
+    hostname: config
+    ports:
+      - 8080:8080
+    networks:
+      - app-tier

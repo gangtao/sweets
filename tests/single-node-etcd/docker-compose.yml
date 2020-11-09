@@ -1,0 +1,36 @@
+version: '2'
+
+networks:
+  app-tier:
+    driver: bridge
+
+services:
+  etcd:
+    image: 'bitnami/etcd:latest'
+    hostname: etcd
+    environment:
+      - ALLOW_NONE_AUTHENTICATION=yes
+      - ETCD_ADVERTISE_CLIENT_URLS=http://etcd:2379
+    cpus: 2.0
+    mem_limit: 512m
+    mem_reservation: 512m
+    ports:
+      - 3000:2379
+      - 3001:2380
+    networks:
+      - app-tier
+  
+  config:
+    image: 'sweets:0.1'
+    restart: always
+    environment:
+      - ETCD_HOST=etcd
+      - ETCD_PORT=2379
+    cpus: 2.0
+    mem_limit: 512m
+    mem_reservation: 512m
+    hostname: config
+    ports:
+      - 8080:8080
+    networks:
+      - app-tier
